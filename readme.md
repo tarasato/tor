@@ -1,6 +1,6 @@
 # Tor — Running the Tor Expert Bundle + Onion Services on Windows
 
-> Short command notes live in [`setup.md`](./setup.md). SSH over Tor: [`ssh-over-tor.md`](./ssh-over-tor.md). This guide follows the official Tor Project documentation (links at the end of each section).
+> Short command notes live in [`setup.md`](./setup.md). SSH over Tor: [`ssh-over-tor.md`](./ssh-over-tor.md) (Windows) · [`ssh-over-tor-arch.md`](./ssh-over-tor-arch.md) (Arch Linux). This guide follows the official Tor Project documentation (links at the end of each section).
 > Checked against the Tor website on 2026-11-13 — latest version at the time: Tor Expert Bundle **16.0.1 (tor 0.4.9.16)**
 
 ---
@@ -158,6 +158,8 @@ type C:\example\tor\TorExpertBundle\tor\TorHiddenService1\hostname
 
 ➡️ **Full step-by-step guide: [`ssh-over-tor.md`](./ssh-over-tor.md)** — installing OpenSSH Server, `sshd_config`, keys, firewall, the onion service for port 22, client config, and PowerShell / cmd alternatives where Git Bash can't be used.
 
+➡️ **Arch Linux server/client: [`ssh-over-tor-arch.md`](./ssh-over-tor-arch.md)** — pacman, systemd, `/etc/tor/torrc`, sshd drop-in config, nftables/ufw.
+
 ## 8. Security (from the Tor docs)
 
 - Bind local services to `127.0.0.1` only (not `0.0.0.0`), otherwise people on the LAN/internet can reach them directly without Tor.
@@ -185,5 +187,5 @@ Run cmd as Administrator · create `c:\temp` first if it doesn't exist (`mkdir c
 - How to verify Tor Browser's signature — <https://support.torproject.org/tbb/how-to-verify-signature/>
 - Set up Your Onion Service — <https://community.torproject.org/onion-services/setup/>
 - Onion Services: Client Authorization — <https://community.torproject.org/onion-services/advanced/client-auth/>
-- SSH over Tor — [`ssh-over-tor.md`](./ssh-over-tor.md)
+- SSH over Tor — [`ssh-over-tor.md`](./ssh-over-tor.md) (Windows), [`ssh-over-tor-arch.md`](./ssh-over-tor-arch.md) (Arch Linux)
 - Original notes in this repo — [`setup.md`](./setup.md)

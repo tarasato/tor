@@ -2,7 +2,7 @@
 
 Reach this PC's SSH server from anywhere through a Tor Onion Service — no router port forwarding, no public IP, and **no inbound firewall port**.
 
-> Back to the main guide: [`readme.md`](./readme.md) (installing and verifying tor, `torrc` basics)
+> Back to the main guide: [`readme.md`](./readme.md) (installing and verifying tor, `torrc` basics) · Arch Linux server: [`ssh-over-tor-arch.md`](./ssh-over-tor-arch.md)
 > Tested on 2026-11-13: Windows 11 (build 26300), Win32-OpenSSH 10.4 (winget), Tor Expert Bundle 16.0.1
 
 ```
@@ -77,36 +77,61 @@ Add-Content C:\ProgramData\ssh\sshd_config "`r`nMatch Group administrators`r`n  
 Get-Content C:\ProgramData\ssh\sshd_config
 ```
 
-Leave `PasswordAuthentication no` for after step 3 if you're not sure the key works yet — otherwise you can lock yourself out.
+Leave `PasswordAuthentication no` for after §3 if you're not sure the key works yet — otherwise you can lock yourself out.
 
-## 3. Create an SSH key and authorize it
+## 3. SSH keys — create, authorize, use, manage
 
-### 3.1 On the client — create the key pair
+### 3.0 How keys work (read once)
 
-**Git Bash / PowerShell / Linux / macOS** (same command everywhere):
+An SSH key is a **pair** of files:
+
+| File | Example | Where it lives | Share? |
+|---|---|---|---|
+| **Private key** | `~/.ssh/example-ssh-tor-ed25519` | Only on the **client** (the device you connect *from*) | **Never** — whoever has it can log in |
+| **Public key** | `~/.ssh/example-ssh-tor-ed25519.pub` | Copied to the **server** (the PC you connect *to*) | Safe to share |
+
+- The server keeps a list of trusted public keys (`administrators_authorized_keys` or `authorized_keys`). When you connect, the client proves it holds the matching private key — no password crosses the network.
+- A `.pub` file alone can't log in anywhere. To use a key on another device you need the **private** key there (§3.6), or better, a new key for that device.
+- A **passphrase** encrypts the private key on disk. If the file is stolen it's useless without the passphrase. `ssh-agent` (§3.5) remembers it so you don't type it every time.
+- **Fingerprint** = short ID of a key (`SHA256:AV/kKV8n...`). Use it to check that the key on the server is the one on the client.
+- Recommended: **one key per device**, each with a clear comment (`-C "phone-tor-ssh"`), so you can revoke one device without touching the others (§3.8).
+
+### 3.1 Create a key pair (on the client)
+
+**Git Bash / PowerShell / Linux / macOS / Termux** — same command everywhere:
 
 ```bash
 ssh-keygen -t ed25519 -f ~/.ssh/example-ssh-tor-ed25519 -C "tor-ssh"
 ```
 
-- Set a passphrase.
-- `example-ssh-tor-ed25519` = **private key** — stays on the client, never share or commit it.
-- `example-ssh-tor-ed25519.pub` = public key — this one goes to the server.
-- In **PowerShell** write `$HOME\.ssh\...` if `~` isn't expanded by the program you use.
+- `-t ed25519` — modern, short, fast key type (use this).
+- `-f` — file name. Pick a descriptive one; the `.pub` is created next to it.
+- `-C` — comment stored in the public key; shows up in the server's key list. Use the device name (`pc-office`, `phone-tor-ssh`, …).
+- It asks `Enter passphrase` — **set one** (typing shows nothing; that's normal). Empty = no passphrase.
+- In **PowerShell**, if `~` isn't expanded, write `$HOME\.ssh\example-ssh-tor-ed25519`.
+- `~/.ssh` doesn't exist yet? `mkdir -p ~/.ssh` (Git Bash) / `mkdir $HOME\.ssh` (PowerShell).
 
-Show the public key (one line starting with `ssh-ed25519 AAAA...`):
+Check what you got:
 
 ```bash
-cat ~/.ssh/example-ssh-tor-ed25519.pub          # Git Bash
+ls -l ~/.ssh/example-ssh-tor-ed25519*                 # two files: key and key.pub
+ssh-keygen -lf ~/.ssh/example-ssh-tor-ed25519.pub     # fingerprint + comment
+cat ~/.ssh/example-ssh-tor-ed25519.pub                # one line: ssh-ed25519 AAAA... tor-ssh
 ```
 ```powershell
-Get-Content $HOME\.ssh\example-ssh-tor-ed25519.pub   # PowerShell
+Get-Content $HOME\.ssh\example-ssh-tor-ed25519.pub    # PowerShell
 ```
 
-### 3.2 On the server — add it to `administrators_authorized_keys`
+### 3.2 Authorize the key on the server
 
-If your Windows account is an **Administrator** (check: `net localgroup Administrators`), keys go into the ProgramData file, not your profile.
-**PowerShell (Admin)** — the file is admin-only, so Git Bash can't write it:
+Which file depends on the Windows account you log in **as** on the server:
+
+| Account type (check: `net localgroup Administrators`) | File | Notes |
+|---|---|---|
+| **Administrator** | `C:\ProgramData\ssh\administrators_authorized_keys` | Needs the `Match Group administrators` block (§2) and strict permissions |
+| Standard user | `C:\Users\<you>\.ssh\authorized_keys` | No `icacls` needed |
+
+**Administrator account — PowerShell (Admin):**
 
 ```powershell
 Add-Content C:\ProgramData\ssh\administrators_authorized_keys "ssh-ed25519 AAAA...your key... tor-ssh"
@@ -114,18 +139,105 @@ icacls C:\ProgramData\ssh\administrators_authorized_keys /inheritance:r /grant "
 Restart-Service sshd
 ```
 
-- The key must be on **one line**.
-- Check the file name: it's `administrators_authorized_key`**`s`** — `icacls` saying `The system cannot find the file specified` usually means a typo.
-- `icacls` must print `Successfully processed 1 files`; sshd ignores the file if anyone else can write to it.
-- **Non-admin account:** put the key in `C:\Users\<you>\.ssh\authorized_keys` instead (no `icacls` needed).
+- `Add-Content` **appends** one line (and creates the file the first time) — existing keys keep working. Run it once per device key.
+- ⚠️ Don't use `Set-Content` (or `>` in bash) on this file — that **overwrites** it and removes every other key.
+- The key must stay on **one line**; paste the whole `.pub` content including `ssh-ed25519` at the start.
+- File name ends in `_keys` — `icacls` saying `The system cannot find the file specified` usually means a typo.
+- `icacls` must print `Successfully processed 1 files`. sshd silently ignores the file if other users can write to it. Run `icacls` again after editing the file with Notepad.
+- Git Bash can't read or write this file after `icacls` (`Permission denied`) — that's expected; use PowerShell (Admin).
 
-### 3.3 Test locally (before Tor)
+Copying the `.pub` from the client to the server: it's one line of text, so paste it via chat/email/USB — it's public. (Never send the private key that way.)
 
-**Git Bash / PowerShell** on the server:
+**Standard account** (in Git Bash on the server):
+
+```bash
+mkdir -p ~/.ssh && cat example-ssh-tor-ed25519.pub >> ~/.ssh/authorized_keys
+```
+
+### 3.3 Verify the server has the right key
+
+Fingerprints must match:
+
+```powershell
+ssh-keygen -lf C:\ProgramData\ssh\administrators_authorized_keys   # server, PowerShell (Admin) - one line per key
+```
+```bash
+ssh-keygen -lf ~/.ssh/example-ssh-tor-ed25519.pub                  # client
+```
+
+### 3.4 Use the key
+
+Test on the server itself first (no Tor yet):
 
 ```bash
 ssh -i ~/.ssh/example-ssh-tor-ed25519 user@127.0.0.1
 ```
+
+- `-i` picks the private key (not the `.pub`).
+- `user` = the Windows account name on the server.
+- First connection asks to trust the host key (`yes`) — it's then stored in `~/.ssh/known_hosts`.
+
+Day-to-day, put it in `~/.ssh/config` so you never type `-i` (full Tor version in §6):
+
+```text
+Host mypc
+    HostName xxxxxxxx.onion
+    User user
+    IdentityFile ~/.ssh/example-ssh-tor-ed25519
+    IdentitiesOnly yes
+```
+
+`IdentitiesOnly yes` = only offer this key. Without it, ssh tries every key it knows and the server may cut you off with `Too many authentication failures`.
+
+### 3.5 Passphrase and ssh-agent
+
+Add or change a passphrase on an existing key (the public key stays the same, nothing to change on the server):
+
+```bash
+ssh-keygen -p -f ~/.ssh/example-ssh-tor-ed25519
+```
+
+Avoid typing it on every connection with `ssh-agent`:
+
+- **Windows (PowerShell Admin, once)** — the agent runs as a service and remembers keys across reboots:
+  ```powershell
+  Set-Service ssh-agent -StartupType Automatic
+  Start-Service ssh-agent
+  ssh-add $HOME\.ssh\example-ssh-tor-ed25519
+  ssh-add -l                      # list loaded keys
+  ```
+  This agent works with Windows' `ssh.exe` (PowerShell / cmd). Git Bash's `ssh` doesn't see it — use the next option there, or run `ssh.exe` from Git Bash.
+- **Git Bash / Linux / Termux** (per terminal session):
+  ```bash
+  eval "$(ssh-agent -s)"
+  ssh-add ~/.ssh/example-ssh-tor-ed25519
+  ```
+- Or add `AddKeysToAgent yes` under `Host mypc` in `~/.ssh/config`: the first connection asks for the passphrase and loads the key into the running agent.
+- Remove keys from the agent: `ssh-add -D`.
+
+### 3.6 Using the same key on another device (not recommended)
+
+Possible, but copy the **private** key (and set a passphrase first) — see the Termux example in §7.1. Prefer a new key per device (§3.1 on that device, §3.2 on the server).
+
+Private-key permissions on the new device:
+
+- **Linux / macOS / Termux:** `chmod 700 ~/.ssh && chmod 600 ~/.ssh/example-ssh-tor-ed25519`
+- **Windows** — if ssh complains `UNPROTECTED PRIVATE KEY FILE` / `bad permissions`, PowerShell:
+  ```powershell
+  icacls $HOME\.ssh\example-ssh-tor-ed25519 /inheritance:r /grant "${env:USERNAME}:F"
+  ```
+
+### 3.7 Back up keys
+
+- Client private keys: back up `~/.ssh/` somewhere encrypted (password manager attachment, encrypted USB). Losing a key isn't fatal — create a new one and authorize it from another way in (local login, another device's key).
+- Server: `administrators_authorized_keys` and the host keys `C:\ProgramData\ssh\ssh_host_*` (keeping the host keys avoids the `REMOTE HOST IDENTIFICATION HAS CHANGED` warning after a reinstall).
+- Never put private keys in git (this repo's `.gitignore` doesn't cover `~/.ssh` — it's outside the repo; keep it that way).
+
+### 3.8 Revoke / rotate a key
+
+- **Revoke a device:** PowerShell (Admin) `notepad C:\ProgramData\ssh\administrators_authorized_keys`, delete that device's line (the comment at the end tells you which), save, re-run the `icacls` line from §3.2, `Restart-Service sshd`.
+- **Rotate** (e.g. yearly, or if a device was lost): create a new key on the client (§3.1), authorize it (§3.2), test it, then delete the old line.
+- List what's authorized: `ssh-keygen -lf C:\ProgramData\ssh\administrators_authorized_keys` (PowerShell Admin).
 
 ## 4. Firewall — open nothing inbound
 
@@ -253,7 +365,7 @@ cat ~/.ssh/example-phone-ed25519.pub
 Send that **one line** to the PC (e.g. message it to yourself) and add it on the server with §3.2 — `Add-Content` appends a new line, so existing keys keep working.
 
 **Alternative — reuse the PC's key instead of creating one on the phone.** The `.pub` alone is not enough: the phone needs the **private key** (`example-ssh-tor-ed25519`), and the server already trusts it, so nothing changes on the server.
-Downsides: the same key now lives on two devices, so you can't revoke just the phone (§7.8), and a lost phone means replacing the key everywhere — set a passphrase first (`ssh-keygen -p -f ~/.ssh/example-ssh-tor-ed25519`).
+Downsides: the same key now lives on two devices, so you can't revoke just the phone (§3.8), and a lost phone means replacing the key everywhere — set a passphrase first (`ssh-keygen -p -f ~/.ssh/example-ssh-tor-ed25519`).
 
 Copy it over USB / wireless debugging with `adb` (**Git Bash** on the PC):
 
@@ -390,6 +502,8 @@ Delete that device's line from `C:\ProgramData\ssh\administrators_authorized_key
 |---|---|
 | `Cannot find any service with service name 'sshd'` | OpenSSH Server not really installed → §1, use `winget install Microsoft.OpenSSH.Preview` |
 | `icacls ... The system cannot find the file specified` | Typo in the file name — it must end in `_keys` (`ls C:\ProgramData\ssh\`) |
+| `Too many authentication failures` | ssh offered too many keys — set `IdentityFile` + `IdentitiesOnly yes` in `~/.ssh/config` (§3.4) |
+| `UNPROTECTED PRIVATE KEY FILE` / `bad permissions` on the client | Fix the private key's permissions (§3.6) |
 | `Warning: Identity file ... not accessible` | Wrong key file name after `-i` / `IdentityFile` → `ls ~/.ssh/` |
 | `Permission denied (publickey,keyboard-interactive)` after `Offering public key` | sshd doesn't find your key: missing `Match Group administrators` block (§2), key not in the file, or wrong `icacls` permissions (§3.2) |
 | Same, and you want to compare keys | **PowerShell (Admin)**: `ssh-keygen -lf C:\ProgramData\ssh\administrators_authorized_keys` vs **Git Bash**: `ssh-keygen -lf ~/.ssh/example-ssh-tor-ed25519.pub` — the `SHA256:` values must match |
