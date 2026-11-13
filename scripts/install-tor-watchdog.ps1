@@ -56,7 +56,7 @@ if ($GrantUser) {
   $sid = (New-Object System.Security.Principal.NTAccount($GrantUser)).Translate([System.Security.Principal.SecurityIdentifier]).Value
   $sd  = ((sc.exe sdshow tor) | Where-Object { $_ -match 'D:' } | Select-Object -First 1).Trim()
   $ace = "(A;;RPWPLCRC;;;$sid)"
-  if ($sd -like "*$ace*") { Write-Host "   already granted" }
+  if ($sd -match [regex]::Escape(";;;$sid)")) { Write-Host "   already granted" }
   else {
     $new = $sd -replace '^D:', "D:$ace"
     sc.exe sdset tor $new | Out-Null
