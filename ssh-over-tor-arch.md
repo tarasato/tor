@@ -1,8 +1,8 @@
 # SSH over Tor (Onion Service) on Arch Linux
 
-The Arch Linux version of [`ssh-over-tor.md`](./ssh-over-tor.md) (Windows): reach an Arch machine's SSH server from anywhere through a Tor Onion Service — no port forwarding, no public IP, **no inbound firewall port**.
+The Arch Linux version of [`ssh-over-tor-windows.md`](./ssh-over-tor-windows.md) (Windows): reach an Arch machine's SSH server from anywhere through a Tor Onion Service — no port forwarding, no public IP, **no inbound firewall port**.
 
-> Back to the main guide: [`readme.md`](./readme.md) · Windows server version: [`ssh-over-tor.md`](./ssh-over-tor.md)
+> Back to the main guide: [`readme.md`](./readme.md) · Windows server version: [`ssh-over-tor-windows.md`](./ssh-over-tor-windows.md)
 > References: [ArchWiki — Tor](https://wiki.archlinux.org/title/Tor), [ArchWiki — OpenSSH](https://wiki.archlinux.org/title/OpenSSH), [Tor — Set up Your Onion Service](https://community.torproject.org/onion-services/setup/)
 
 ```
@@ -25,7 +25,7 @@ sudo pacman -S openssh tor
 
 ## 2. Server — SSH keys
 
-Keys work the same as on Windows — see [`ssh-over-tor.md` §3.0](./ssh-over-tor.md#30-how-keys-work-read-once) for the concepts (private vs public key, passphrase, one key per device).
+Keys work the same as on Windows — see [`ssh-over-tor-windows.md` §3.0](./ssh-over-tor-windows.md#30-how-keys-work-read-once) for the concepts (private vs public key, passphrase, one key per device).
 
 ### 2.1 Create a key on each client
 
@@ -53,6 +53,55 @@ chmod 600 ~/.ssh/authorized_keys
 - Permissions matter: with `StrictModes yes` (default) sshd ignores `authorized_keys` if `~/.ssh` or the file is writable by others. Your home directory must not be group/world-writable either.
 - If the client can already reach the server over LAN, `ssh-copy-id -i ~/.ssh/example-ssh-tor-ed25519.pub user@<lan-ip>` does all of the above for you.
 - Check fingerprints match: `ssh-keygen -lf ~/.ssh/authorized_keys` (server) vs `ssh-keygen -lf ~/.ssh/example-ssh-tor-ed25519.pub` (client).
+
+### 2.3 Log in as admin or as a normal user
+
+On Linux "admin" means a user in the `wheel` group who can use `sudo` — not logging in as `root`.
+
+| | Admin (`wheel` + sudo) | Normal user | `root` |
+|---|---|---|---|
+| Key file | `~/.ssh/authorized_keys` of that user | `~/.ssh/authorized_keys` of that user | `/root/.ssh/authorized_keys` |
+| Rights | Normal; `sudo <cmd>` for admin tasks | Normal only | Everything, no confirmation |
+| Recommended | ✅ for maintenance | ✅ for daily use | ❌ keep `PermitRootLogin no` |
+
+Create a normal user for SSH and give it its own key:
+
+```bash
+sudo useradd -m -s /bin/bash sshuser
+sudo install -d -m 700 -o sshuser -g sshuser /home/sshuser/.ssh
+echo "ssh-ed25519 AAAA...client key... laptop-user" | sudo tee -a /home/sshuser/.ssh/authorized_keys > /dev/null
+sudo chown sshuser:sshuser /home/sshuser/.ssh/authorized_keys
+sudo chmod 600 /home/sshuser/.ssh/authorized_keys
+```
+
+Make an existing user an admin (needs `sudo` installed and `%wheel ALL=(ALL:ALL) ALL` enabled via `sudo EDITOR=nano visudo`):
+
+```bash
+sudo usermod -aG wheel adminaccount
+```
+
+Client `~/.ssh/config` with one entry per account (same .onion, different key):
+
+```text
+Host mypc-admin
+    HostName xxxxxxxx.onion
+    User adminaccount
+    IdentityFile ~/.ssh/example-admin-ed25519
+    IdentitiesOnly yes
+    ProxyCommand nc -X 5 -x 127.0.0.1:9050 %h %p
+
+Host mypc-user
+    HostName xxxxxxxx.onion
+    User sshuser
+    IdentityFile ~/.ssh/example-user-ed25519
+    IdentitiesOnly yes
+    ProxyCommand nc -X 5 -x 127.0.0.1:9050 %h %p
+```
+
+- In an admin session use `sudo` for system tasks; check with `id` (`wheel` listed) and `sudo -v`.
+- A normal user can't `sudo` — log in as `mypc-admin` when you need it.
+- Limit who may log in: add `AllowUsers adminaccount sshuser` to the drop-in file in §3.
+- Root over SSH only if you really must: `PermitRootLogin prohibit-password` (keys only) and a key in `/root/.ssh/authorized_keys`. Prefer `sudo`.
 
 ## 3. Server — configure sshd (localhost only, keys only)
 
@@ -197,7 +246,7 @@ ssh mypc
 - First connection takes 10–30 s while the onion circuit is built.
 - `ssh-agent`: `eval "$(ssh-agent -s)"; ssh-add ~/.ssh/example-ssh-tor-ed25519`, or enable the user unit `systemctl --user enable --now ssh-agent` and set `SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket"` in your shell profile.
 
-Clients on other systems (Windows, Android Termux / Orbot / Tor VPN, macOS): see [`ssh-over-tor.md` §6–§7](./ssh-over-tor.md#7-connecting-from-other-devices) — only the server side differs.
+Clients on other systems (Windows, Android Termux / Orbot / Tor VPN, macOS): see [`ssh-over-tor-windows.md` §6–§7](./ssh-over-tor-windows.md#7-connecting-from-other-devices) — only the server side differs.
 
 ## 7. Hardening (optional, recommended)
 

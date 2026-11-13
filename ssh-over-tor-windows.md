@@ -1,8 +1,8 @@
-# SSH over Tor (Onion Service) on Windows
+# SSH over Tor (Onion Service) — Windows server
 
 Reach this PC's SSH server from anywhere through a Tor Onion Service — no router port forwarding, no public IP, and **no inbound firewall port**.
 
-> Back to the main guide: [`readme.md`](./readme.md) (installing and verifying tor, `torrc` basics) · Arch Linux server: [`ssh-over-tor-arch.md`](./ssh-over-tor-arch.md)
+> Back to the main guide: [`readme.md`](./readme.md) (installing and verifying tor, `torrc` basics) · Arch Linux version: [`ssh-over-tor-arch.md`](./ssh-over-tor-arch.md)
 > Tested on 2026-11-13: Windows 11 (build 26300), Win32-OpenSSH 10.4 (winget), Tor Expert Bundle 16.0.1
 
 ```
@@ -238,6 +238,131 @@ Private-key permissions on the new device:
 - **Revoke a device:** PowerShell (Admin) `notepad C:\ProgramData\ssh\administrators_authorized_keys`, delete that device's line (the comment at the end tells you which), save, re-run the `icacls` line from §3.2, `Restart-Service sshd`.
 - **Rotate** (e.g. yearly, or if a device was lost): create a new key on the client (§3.1), authorize it (§3.2), test it, then delete the old line.
 - List what's authorized: `ssh-keygen -lf C:\ProgramData\ssh\administrators_authorized_keys` (PowerShell Admin).
+
+### 3.9 Log in as an administrator or as a standard user
+
+Each SSH login is a **Windows account** on the server: `ssh <account>@<host>`. You can have both an admin login (full control) and a standard-user login (everyday work, can't change the system).
+
+| | Administrator account | Standard user account |
+|---|---|---|
+| Key file on the server | `C:\ProgramData\ssh\administrators_authorized_keys` (**one file shared by all admin accounts**) | `C:\Users\<account>\.ssh\authorized_keys` (per account) |
+| Session rights | Full admin (elevated — no UAC prompt over SSH) | Normal user rights only |
+| Can run `Restart-Service`, `icacls` on ProgramData, install software | Yes | No |
+| Good for | Server maintenance | Daily use, file access, less damage if a key leaks |
+
+⚠️ A key in `administrators_authorized_keys` can log in to **every** administrator account on that PC. Only put keys there for devices you'd trust with full control.
+
+#### 3.9.1 Check which accounts exist and what they are
+
+**PowerShell:**
+
+```powershell
+whoami                                 # current account
+Get-LocalUser | Select Name,Enabled    # local accounts
+net localgroup Administrators          # which ones are admins
+```
+
+The SSH login name is the **local account name** (the `Name` column, usually the folder name under `C:\Users\`). For a Microsoft-account login you can also use the email address.
+
+#### 3.9.2 (Optional) create a standard user just for SSH
+
+**PowerShell (Admin):**
+
+```powershell
+$pw = Read-Host -AsSecureString "Password for the new account"
+New-LocalUser -Name "sshuser" -Password $pw -FullName "SSH user" -PasswordNeverExpires
+Add-LocalGroupMember -Group "Users" -Member "sshuser"
+```
+
+- The password is only for logging in at the PC itself — SSH still uses keys (`PasswordAuthentication no`).
+- Its profile folder `C:\Users\sshuser\` is created at its **first** login. Create it now by signing in once at the PC, or with `runas /user:sshuser cmd` (enter the password, then close the window).
+
+#### 3.9.3 Authorize a key for the standard user
+
+**PowerShell (Admin)** — the folder belongs to the other account, so use an admin shell:
+
+```powershell
+$u = "sshuser"
+New-Item -ItemType Directory -Force "C:\Users\$u\.ssh" | Out-Null
+Add-Content "C:\Users\$u\.ssh\authorized_keys" "ssh-ed25519 AAAA...client key... laptop-user"
+icacls "C:\Users\$u\.ssh\authorized_keys" /inheritance:r /grant "${u}:F" /grant "SYSTEM:F" /grant "Administrators:F"
+```
+
+- If you're signed in **as that user**, Git Bash works too: `mkdir -p ~/.ssh && cat key.pub >> ~/.ssh/authorized_keys`.
+- sshd rejects the file if another non-admin user can write to it — the `icacls` line prevents that.
+- Use a **different key** from the admin one, so a device can be given user access without admin access.
+
+Admin keys are set up in §3.2 (`administrators_authorized_keys`).
+
+#### 3.9.4 Connect as admin or as user
+
+One-off (add the Tor `ProxyCommand` from §6 when connecting over .onion):
+
+```bash
+ssh -i ~/.ssh/example-admin-ed25519 adminaccount@127.0.0.1    # admin
+ssh -i ~/.ssh/example-user-ed25519  sshuser@127.0.0.1         # standard user
+```
+
+Two entries in the client's `~/.ssh/config`, same .onion address, different account and key:
+
+```text
+Host mypc-admin
+    HostName xxxxxxxx.onion
+    User adminaccount
+    IdentityFile ~/.ssh/example-admin-ed25519
+    IdentitiesOnly yes
+    ProxyCommand connect -S 127.0.0.1:9050 %h %p
+
+Host mypc-user
+    HostName xxxxxxxx.onion
+    User sshuser
+    IdentityFile ~/.ssh/example-user-ed25519
+    IdentitiesOnly yes
+    ProxyCommand connect -S 127.0.0.1:9050 %h %p
+```
+
+```bash
+ssh mypc-admin
+ssh mypc-user
+```
+
+Check what you got after logging in:
+
+```powershell
+whoami                     # account name
+whoami /groups | findstr /i "S-1-16-12288 S-1-16-8192"   # High = admin (elevated), Medium = standard
+```
+
+#### 3.9.5 Getting admin rights from a user session
+
+There's no `sudo` over SSH on Windows (UAC can't prompt in an SSH session, and Windows' own `sudo` doesn't work there). When you need admin rights, **disconnect and log in as the admin account** (`ssh mypc-admin`). Keep admin logins for maintenance only.
+
+#### 3.9.6 Restrict who may log in (optional)
+
+Add **above** the `Match` block in `sshd_config` (PowerShell (Admin) `notepad C:\ProgramData\ssh\sshd_config`), then `Restart-Service sshd`:
+
+```text
+# only these accounts may log in over SSH
+AllowUsers adminaccount sshuser
+```
+
+Or by group — names are case-sensitive and lower-case for built-in groups:
+
+```text
+AllowGroups administrators users
+```
+
+To allow **only** the standard user (no admin over SSH at all): `AllowUsers sshuser` and leave `administrators_authorized_keys` empty.
+
+#### 3.9.7 Default shell (optional)
+
+SSH sessions start in `cmd.exe`. To get PowerShell instead — **PowerShell (Admin)**:
+
+```powershell
+New-ItemProperty -Path "HKLM:\SOFTWARE\OpenSSH" -Name DefaultShell -Value "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" -PropertyType String -Force
+```
+
+This applies to all accounts. Remove it with `Remove-ItemProperty -Path "HKLM:\SOFTWARE\OpenSSH" -Name DefaultShell`.
 
 ## 4. Firewall — open nothing inbound
 
