@@ -1,202 +1,44 @@
-Tor Browser/Tor Browser.lnk
-Tor Browser/Browser/AccessibleMarshal.dll
-Tor Browser/Browser/application.ini
-Tor Browser/Browser/d3dcompiler_47.dll
-Tor Browser/Browser/dependentlibs.list
-Tor Browser/Browser/firefox.exe
-Tor Browser/Browser/firefox.VisualElementsManifest.xml
-Tor Browser/Browser/freebl3.dll
-Tor Browser/Browser/gkcodecs.dll
-Tor Browser/Browser/ipcclientcerts.dll
-Tor Browser/Browser/lgpllibs.dll
-Tor Browser/Browser/libEGL.dll
-Tor Browser/Browser/libGLESv2.dll
-Tor Browser/Browser/mozavcodec.dll
-Tor Browser/Browser/mozavutil.dll
-Tor Browser/Browser/mozglue.dll
-Tor Browser/Browser/nmhproxy.exe
-Tor Browser/Browser/nss3.dll
-Tor Browser/Browser/nssckbi.dll
-Tor Browser/Browser/omni.ja
-Tor Browser/Browser/osclientcerts.dll
-Tor Browser/Browser/platform.ini
-Tor Browser/Browser/plugin-container.exe
-Tor Browser/Browser/precomplete
-Tor Browser/Browser/removed-files
-Tor Browser/Browser/softokn3.dll
-Tor Browser/Browser/tbb_version.json
-Tor Browser/Browser/update-settings.ini
-Tor Browser/Browser/updater.exe
-Tor Browser/Browser/updater.ini
-Tor Browser/Browser/xul.dll
-Tor Browser/Browser/browser/omni.ja
-Tor Browser/Browser/browser/VisualElements/VisualElements_70.png
-Tor Browser/Browser/browser/VisualElements/VisualElements_150.png
-Tor Browser/Browser/defaults/pref/channel-prefs.js
-Tor Browser/Browser/distribution/extensions/{73a6fe31-595d-460b-a920-fcc0f8843232}.xpi
-Tor Browser/Browser/fonts/000_README.txt
-Tor Browser/Browser/fonts/NotoNaskhArabic-Regular.ttf
-Tor Browser/Browser/fonts/NotoSans-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansAdlam-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansBalinese-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansBamum-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansBassaVah-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansBatak-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansBengali-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansBuginese-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansBuhid-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansCanadianAboriginal-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansChakma-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansCham-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansCherokee-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansCoptic-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansDeseret-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansDevanagari-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansElbasan-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansEthiopic-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansGeorgian-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansGrantha-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansGujarati-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansGunjalaGondi-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansGurmukhi-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansHanifiRohingya-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansHanunoo-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansJavanese-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansKannada-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansKayahLi-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansKhmer-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansKhojki-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansKhudawadi-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansLao-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansLepcha-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansLimbu-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansLisu-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansMahajani-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansMalayalam-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansMandaic-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansMasaramGondi-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansMedefaidrin-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansMeeteiMayek-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansMendeKikakui-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansMiao-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansModi-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansMongolian-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansMro-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansMultani-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansNewa-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansNewTaiLue-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansNKo-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansOlChiki-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansOriya-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansOsage-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansOsmanya-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansPahawhHmong-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansPauCinHau-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansRejang-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansRunic-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansSamaritan-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansSaurashtra-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansSharada-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansShavian-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansSinhala-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansSoraSompeng-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansSoyombo-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansSundanese-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansSylotiNagri-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansSymbols-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansSymbols2-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansSyriac-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansTagalog-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansTagbanwa-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansTaiLe-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansTaiTham-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansTaiViet-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansTakri-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansTamil-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansTelugu-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansThaana-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansTifinagh-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansTifinaghAdrar-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansTifinaghAgrawImazighen-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansTifinaghAhaggar-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansTifinaghAir-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansTifinaghAPT-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansTifinaghAzawagh-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansTifinaghGhat-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansTifinaghHawad-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansTifinaghRhissaIxa-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansTifinaghSIL-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansTifinaghTawellemmet-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansTirhuta-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansVai-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansWancho-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansWarangCiti-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansYi-Regular.ttf
-Tor Browser/Browser/fonts/NotoSansZanabazarSquare-Regular.ttf
-Tor Browser/Browser/fonts/NotoSerif-Regular.ttf
-Tor Browser/Browser/fonts/NotoSerifBalinese-Regular.ttf
-Tor Browser/Browser/fonts/NotoSerifBengali-Regular.ttf
-Tor Browser/Browser/fonts/NotoSerifDevanagari-Regular.ttf
-Tor Browser/Browser/fonts/NotoSerifDogra-Regular.ttf
-Tor Browser/Browser/fonts/NotoSerifEthiopic-Regular.ttf
-Tor Browser/Browser/fonts/NotoSerifGeorgian-Regular.ttf
-Tor Browser/Browser/fonts/NotoSerifGrantha-Regular.ttf
-Tor Browser/Browser/fonts/NotoSerifGujarati-Regular.ttf
-Tor Browser/Browser/fonts/NotoSerifGurmukhi-Regular.ttf
-Tor Browser/Browser/fonts/NotoSerifKannada-Regular.ttf
-Tor Browser/Browser/fonts/NotoSerifKhmer-Regular.ttf
-Tor Browser/Browser/fonts/NotoSerifKhojki-Regular.ttf
-Tor Browser/Browser/fonts/NotoSerifLao-Regular.ttf
-Tor Browser/Browser/fonts/NotoSerifMalayalam-Regular.ttf
-Tor Browser/Browser/fonts/NotoSerifMyanmar-Regular.ttf
-Tor Browser/Browser/fonts/NotoSerifNPHmong-Regular.ttf
-Tor Browser/Browser/fonts/NotoSerifSinhala-Regular.ttf
-Tor Browser/Browser/fonts/NotoSerifTamil-Regular.ttf
-Tor Browser/Browser/fonts/NotoSerifTelugu-Regular.ttf
-Tor Browser/Browser/fonts/NotoSerifTibetan-Regular.ttf
-Tor Browser/Browser/fonts/NotoSerifYezidi-Regular.ttf
-Tor Browser/Browser/fonts/Pyidaungsu-2.5.3_Regular.ttf
-Tor Browser/Browser/fonts/TwemojiMozilla.ttf
-Tor Browser/Browser/TorBrowser/Data/Browser/profiles.ini
-Tor Browser/Browser/TorBrowser/Data/Browser/profile.default/extensions/{73a6fe31-595d-460b-a920-fcc0f8843232}.xpi
-Tor Browser/Browser/TorBrowser/Data/Tor/geoip
-Tor Browser/Browser/TorBrowser/Data/Tor/geoip6
-Tor Browser/Browser/TorBrowser/Data/Tor/torrc
-Tor Browser/Browser/TorBrowser/Data/Tor/torrc-defaults
-Tor Browser/Browser/TorBrowser/Docs/ChangeLog.txt
-Tor Browser/Browser/TorBrowser/Docs/conjure/README.md
-Tor Browser/Browser/TorBrowser/Docs/Licenses/conjure.txt
-Tor Browser/Browser/TorBrowser/Docs/Licenses/Firefox.txt
-Tor Browser/Browser/TorBrowser/Docs/Licenses/libevent.txt
-Tor Browser/Browser/TorBrowser/Docs/Licenses/lyrebird.txt
-Tor Browser/Browser/TorBrowser/Docs/Licenses/NoScript.txt
-Tor Browser/Browser/TorBrowser/Docs/Licenses/Noto-CJK-Font.txt
-Tor Browser/Browser/TorBrowser/Docs/Licenses/Noto-Fonts.txt
-Tor Browser/Browser/TorBrowser/Docs/Licenses/openssl.txt
-Tor Browser/Browser/TorBrowser/Docs/Licenses/Tor-Launcher.txt
-Tor Browser/Browser/TorBrowser/Docs/Licenses/tor.txt
-Tor Browser/Browser/TorBrowser/Docs/Licenses/Torbutton.txt
-Tor Browser/Browser/TorBrowser/Docs/Licenses/zlib.txt
-Tor Browser/Browser/TorBrowser/Tor/tor.exe
-Tor Browser/Browser/TorBrowser/Tor/PluggableTransports/conjure-client.exe
-Tor Browser/Browser/TorBrowser/Tor/PluggableTransports/lyrebird.exe
-TorExpertBundle/data/cached-certs
-TorExpertBundle/data/cached-microdesc-consensus
-TorExpertBundle/data/cached-microdescs
-TorExpertBundle/data/cached-microdescs.new
-TorExpertBundle/data/geoip
-TorExpertBundle/data/geoip6
-TorExpertBundle/data/lock
-TorExpertBundle/data/state
-TorExpertBundle/docs/conjure.txt
-TorExpertBundle/docs/libevent.txt
-TorExpertBundle/docs/lyrebird.txt
-TorExpertBundle/docs/openssl.txt
-TorExpertBundle/docs/tor.txt
-TorExpertBundle/docs/zlib.txt
-TorExpertBundle/tor/tor-gencert.exe
-TorExpertBundle/tor/tor.exe
-TorExpertBundle/tor/pluggable_transports/conjure-client.exe
-TorExpertBundle/tor/pluggable_transports/lyrebird.exe
-TorExpertBundle/tor/pluggable_transports/pt_config.json
-TorExpertBundle/tor/pluggable_transports/README.CONJURE.md
+# Track only what we write ourselves: torrc, .bat scripts, docs (.md)
+# Ignore anything re-downloadable, generated by tor at runtime, or secret
+
+# ── Tor Browser (whole folder — always re-downloadable from torproject.org) ──
+Tor Browser/
+tor-browser*/
+
+# ── Tor Expert Bundle: binaries and bundled files ──
+*.exe
+*.dll
+TorExpertBundle/tor/pluggable_transports/
+TorExpertBundle/docs/
+TorExpertBundle/**/geoip
+TorExpertBundle/**/geoip6
+
+# ── Created by tor at runtime (DataDirectory: cache, state, lock) ──
+TorExpertBundle/data/
+TorExpertBundle/Data/
+*.log
+log.txt
+
+# ── Onion Service secret keys — never commit ──
+# (hostname is shareable, but it lives next to the keys, so the whole folder is excluded)
+TorHiddenService*/
+**/hs_ed25519_secret_key
+**/hs_ed25519_public_key
+**/authorized_clients/
+*.auth
+*.auth_private
+
+# ── Downloads / signature verification ──
+*.asc
+*.tar.xz
+*.tar.gz
+*.zip
+*.keyring
+
+# ── OS / editor ──
+Thumbs.db
+desktop.ini
+.DS_Store
+.vscode/
+.idea/
+*.swp
