@@ -221,13 +221,122 @@ Or use `ncat` from [Nmap](https://nmap.org/download.html):
     ProxyCommand nc -X 5 -x 127.0.0.1:9050 %h %p
 ```
 
-## 7. Hardening (optional, recommended)
+## 7. Connecting from other devices
+
+Same rules on every device: **run tor there**, **give each device its own key** (create it on that device, then add its `.pub` line to the server — §3.2), and point SSH at the local SOCKS port.
+
+| Device | tor | SOCKS port | Proxy for SSH |
+|---|---|---|---|
+| Android — Termux | `pkg install tor` | 9050 | `torsocks ssh` or `nc -X 5 -x` |
+| Android — Orbot | Orbot app | 9050 | Termux `ssh` + `nc`/`torsocks` |
+| Windows PC | Tor Browser / Expert Bundle | 9150 / 9050 | `connect` (Git Bash) / `ncat` |
+| Linux | `apt install tor` (service) | 9050 | `torsocks ssh` or `nc -X 5 -x` |
+| macOS | `brew install tor` | 9050 | `nc -X 5 -x` |
+
+### 7.1 Android — Termux
+
+Install Termux from **F-Droid** or GitHub releases (the Google Play build is outdated).
+
+```bash
+pkg update && pkg upgrade
+pkg install openssh tor torsocks netcat-openbsd
+```
+
+Create a key on the phone and show the public key:
+
+```bash
+ssh-keygen -t ed25519 -f ~/.ssh/example-phone-ed25519 -C "phone-tor-ssh"
+cat ~/.ssh/example-phone-ed25519.pub
+```
+
+Send that **one line** to the PC (e.g. message it to yourself) and add it on the server with §3.2 — `Add-Content` appends a new line, so existing keys keep working.
+
+Start tor in the background and wait until it's ready:
+
+```bash
+tor > ~/tor.log 2>&1 &
+tail -f ~/tor.log          # wait for "Bootstrapped 100% (done)", then Ctrl+C
+```
+
+Connect — either with torsocks:
+
+```bash
+torsocks ssh -i ~/.ssh/example-phone-ed25519 user@xxxxxxxx.onion
+```
+
+or permanently via `~/.ssh/config` (then just `ssh mypc`):
+
+```bash
+mkdir -p ~/.ssh && cat >> ~/.ssh/config <<'EOF'
+Host mypc
+    HostName xxxxxxxx.onion
+    User user
+    IdentityFile ~/.ssh/example-phone-ed25519
+    IdentitiesOnly yes
+    ProxyCommand nc -X 5 -x 127.0.0.1:9050 %h %p
+EOF
+chmod 600 ~/.ssh/config
+ssh mypc
+```
+
+Tips:
+- Stop tor when you're done: `pkill tor`.
+- Android may kill Termux in the background — run `termux-wake-lock` while connected, or allow Termux to ignore battery optimisation.
+- The first connection takes 10–30 s while Tor builds the circuit to the onion service; that's normal.
+- Missing keys on the phone keyboard? Long-press the screen → *More* → *Toggle extra keys* for Ctrl/Esc/Tab/arrows.
+
+### 7.2 Android — Orbot instead of tor in Termux
+
+If you already use [Orbot](https://orbot.app/) (Tor Project's Android app): start Orbot, then in Termux use the same `ssh` / `~/.ssh/config` as §7.1 **without** running `tor` yourself — Orbot's SOCKS port is also `127.0.0.1:9050` (check Orbot → Settings if you changed it).
+Don't route Termux through Orbot's VPN mode *and* a SOCKS proxy at the same time; pick one (SOCKS is simpler).
+
+### 7.3 Another Windows PC
+
+1. Run tor: open **Tor Browser** (SOCKS **9150**, keep the window open) or the Expert Bundle (`tor.exe`, SOCKS **9050**).
+2. Create that PC's own key (§3.1) and add its `.pub` to the server (§3.2).
+3. Connect from **Git Bash** — set the port to match step 1:
+
+```bash
+ssh -i ~/.ssh/example-ssh-tor-ed25519 -o ProxyCommand="connect -S 127.0.0.1:9150 %h %p" user@xxxxxxxx.onion
+```
+
+From **PowerShell / cmd** without Git Bash, use the `~/.ssh/config` from §6 with the full `connect.exe` path or `ncat` — the file is `C:\Users\<you>\.ssh\config`.
+
+### 7.4 Linux
+
+```bash
+sudo apt install tor torsocks openssh-client netcat-openbsd    # Debian/Ubuntu
+sudo systemctl enable --now tor                                 # tor runs as a service on 9050
+torsocks ssh -i ~/.ssh/example-ssh-tor-ed25519 user@xxxxxxxx.onion
+```
+
+Or `ProxyCommand nc -X 5 -x 127.0.0.1:9050 %h %p` in `~/.ssh/config` (§6).
+
+### 7.5 macOS
+
+```bash
+brew install tor
+brew services start tor                 # SOCKS on 9050
+ssh -o ProxyCommand="nc -X 5 -x 127.0.0.1:9050 %h %p" -i ~/.ssh/example-ssh-tor-ed25519 user@xxxxxxxx.onion
+```
+
+macOS's built-in `nc` supports `-X 5 -x`, so nothing else is needed.
+
+### 7.6 iPhone / iPad
+
+There's no Termux equivalent; SSH apps need their own Tor support or a SOCKS proxy (e.g. Onion Browser doesn't provide one to other apps). Not covered here — use Android or a computer.
+
+### 7.7 Revoking a device
+
+Delete that device's line from `C:\ProgramData\ssh\administrators_authorized_keys` (**PowerShell (Admin)**: `notepad C:\ProgramData\ssh\administrators_authorized_keys`), save, then `Restart-Service sshd`. This is why each device should have its own key — the comment at the end of each line (`phone-tor-ssh`, `tor-ssh`, …) tells you which is which.
+
+## 8. Hardening (optional, recommended)
 
 - Enable [Client Authorization](https://community.torproject.org/onion-services/advanced/client-auth/) for the SSH service: without the client key nobody can even reach the service, even if the .onion address leaks — a second layer on top of SSH keys.
 - Keep `PasswordAuthentication no`.
 - One key per client device, so one can be revoked by deleting its line in `administrators_authorized_keys`.
 
-## 8. Troubleshooting
+## 9. Troubleshooting
 
 | Symptom | Cause / fix |
 |---|---|
