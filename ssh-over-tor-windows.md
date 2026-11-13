@@ -296,12 +296,21 @@ Admin keys are set up in §3.2 (`administrators_authorized_keys`).
 
 #### 3.9.4 Connect as admin or as user
 
-One-off (add the Tor `ProxyCommand` from §6 when connecting over .onion):
+**On the server itself** (local test, no Tor):
 
 ```bash
 ssh -i ~/.ssh/example-admin-ed25519 adminaccount@127.0.0.1    # admin
 ssh -i ~/.ssh/example-user-ed25519  sshuser@127.0.0.1         # standard user
 ```
+
+**From any other device** — `127.0.0.1` would mean *that* device itself, so use the `.onion` address and go through Tor (tor running on the client, §6):
+
+```bash
+ssh -i ~/.ssh/example-admin-ed25519 -o ProxyCommand="connect -S 127.0.0.1:9050 %h %p" adminaccount@xxxxxxxx.onion
+ssh -i ~/.ssh/example-user-ed25519  -o ProxyCommand="connect -S 127.0.0.1:9050 %h %p" sshuser@xxxxxxxx.onion
+```
+
+(`127.0.0.1:9050` in `ProxyCommand` is the client's own tor SOCKS port — that one stays. Termux / Linux: `nc -X 5 -x 127.0.0.1:9050 %h %p`; Tor VPN on Android: no `ProxyCommand` at all.)
 
 Two entries in the client's `~/.ssh/config`, same .onion address, different account and key:
 
