@@ -173,8 +173,23 @@ Test on the server itself first (no Tor yet):
 ssh -i ~/.ssh/example-ssh-tor-ed25519 user@127.0.0.1
 ```
 
+From **another device**, `127.0.0.1` would point at that device itself — use the `.onion` address through the client's tor (§5–§6):
+
+```bash
+ssh -i ~/.ssh/example-ssh-tor-ed25519 -o ProxyCommand="connect -S 127.0.0.1:9050 %h %p" user@xxxxxxxx.onion
+```
+
+| Where you run `ssh` | Host part | Proxy |
+|---|---|---|
+| On the server itself (test) | `user@127.0.0.1` | none |
+| Other Windows PC (Git Bash) | `user@xxxxxxxx.onion` | `connect -S 127.0.0.1:9050 %h %p` (9150 with Tor Browser) |
+| Linux / macOS / Termux | `user@xxxxxxxx.onion` | `nc -X 5 -x 127.0.0.1:9050 %h %p` or `torsocks ssh ...` |
+| Android with Tor VPN | `user@xxxxxxxx.onion` | none (the VPN handles it) |
+
+The `127.0.0.1:9050` inside `ProxyCommand` is the **client's own** tor — that one never changes to the .onion address.
+
 - `-i` picks the private key (not the `.pub`).
-- `user` = the Windows account name on the server.
+- `user` = the Windows account name on the server (replace with yours).
 - First connection asks to trust the host key (`yes`) — it's then stored in `~/.ssh/known_hosts`.
 
 Day-to-day, put it in `~/.ssh/config` so you never type `-i` (full Tor version in §6):

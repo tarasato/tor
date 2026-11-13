@@ -138,6 +138,16 @@ ss -tlnp | grep ':22 '                     # must show 127.0.0.1:22 only
 ssh -i ~/.ssh/example-ssh-tor-ed25519 user@127.0.0.1
 ```
 
+`127.0.0.1` works **only on the server itself**. From another device use the `.onion` address (§4) through that device's tor (§6):
+
+```bash
+ssh -i ~/.ssh/example-ssh-tor-ed25519 -o ProxyCommand="nc -X 5 -x 127.0.0.1:9050 %h %p" user@xxxxxxxx.onion
+# or
+torsocks ssh -i ~/.ssh/example-ssh-tor-ed25519 user@xxxxxxxx.onion
+```
+
+The `127.0.0.1:9050` in `ProxyCommand` is the client's own tor SOCKS port — it stays as is.
+
 (Run on the server with a key that's in `authorized_keys`, or temporarily from a client over the LAN before setting `ListenAddress`.)
 
 ## 4. Server — publish the Onion Service
