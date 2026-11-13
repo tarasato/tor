@@ -378,15 +378,56 @@ AllowGroups administrators users
 
 To allow **only** the standard user (no admin over SSH at all): `AllowUsers sshuser` and leave `administrators_authorized_keys` empty.
 
-#### 3.9.7 Default shell (optional)
+#### 3.9.7 Shell after login: cmd, PowerShell or Git Bash
 
-SSH sessions start in `cmd.exe`. To get PowerShell instead — **PowerShell (Admin)**:
+SSH sessions start in **`cmd.exe`** by default.
+
+**Git Bash over SSH:** `git-bash.exe` opens a *window on the PC's screen*, so it does nothing useful over SSH. Run the console shell `bash.exe` instead:
+
+```bat
+"C:\Program Files\Git\bin\bash.exe" -l
+```
+
+(`-l` = login shell, so `~/.bashrc` / `~/.bash_profile` are loaded.)
+
+**Make Git Bash the default** — **PowerShell (Admin)**, no sshd restart needed:
+
+```powershell
+New-ItemProperty -Path "HKLM:\SOFTWARE\OpenSSH" -Name DefaultShell -Value "C:\Program Files\Git\bin\bash.exe" -PropertyType String -Force
+New-ItemProperty -Path "HKLM:\SOFTWARE\OpenSSH" -Name DefaultShellCommandOption -Value "-c" -PropertyType String -Force
+```
+
+**Or PowerShell as the default:**
 
 ```powershell
 New-ItemProperty -Path "HKLM:\SOFTWARE\OpenSSH" -Name DefaultShell -Value "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" -PropertyType String -Force
 ```
 
-This applies to all accounts. Remove it with `Remove-ItemProperty -Path "HKLM:\SOFTWARE\OpenSSH" -Name DefaultShell`.
+- Applies to every account and the next SSH login.
+- Back to `cmd.exe`: `Remove-ItemProperty -Path "HKLM:\SOFTWARE\OpenSSH" -Name DefaultShell` (and `DefaultShellCommandOption` if you set it).
+- Commands passed on the ssh line (`ssh mypc "git status"`) also run in the default shell — with Git Bash that's bash syntax.
+
+#### 3.9.8 Interactive programs over SSH
+
+Full-screen / interactive programs (editors, `htop`-style tools, AI CLIs such as Hermes Agent, `python` REPL) need a terminal:
+
+- Logging in first and then starting the program works as usual.
+- Starting it directly from the ssh command needs `-t`: `ssh -t mypc hermes` (without `-t` you get *not a terminal* errors or no prompt).
+- A program that's installed but not on `PATH` → `command not found`; run it by full path or see §3.9.9.
+
+#### 3.9.9 (Optional) add your own tools to `PATH` in Git Bash
+
+Programs installed per user (e.g. under `AppData\Local\...`) are often not on the SSH session's `PATH`. Add their folder in `~/.bashrc` — example for Hermes Agent:
+
+```bash
+echo 'export PATH="$PATH:/c/Users/<you>/AppData/Local/hermes/bin"' >> ~/.bashrc
+source ~/.bashrc
+which hermes          # should print the path
+```
+
+- Replace `<you>` with your Windows account folder name; repeat the `echo` line for other tools.
+- `>>` appends — run it once (running it twice just adds a duplicate line; harmless but messy, remove it with any editor).
+- This only affects Git Bash. For cmd / PowerShell, add the folder to the user `PATH` instead: **PowerShell** `[Environment]::SetEnvironmentVariable("Path", [Environment]::GetEnvironmentVariable("Path","User") + ";C:\Users\<you>\AppData\Local\hermes\bin", "User")`, then log in again.
 
 ## 4. Firewall — open nothing inbound
 
