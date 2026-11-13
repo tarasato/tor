@@ -484,6 +484,24 @@ type C:\example\tor\TorExpertBundle\tor\TorHiddenServiceSSH\hostname  :: cmd
 
 `TorHiddenServiceSSH\` holds the service's private key — it is excluded by `.gitignore`; back it up outside the repo to keep the same address.
 
+### 5.1 Start tor at boot (Windows service)
+
+Started by hand, tor stops when you log out or reboot — and then nobody can SSH in. Run it as a service instead (starts at boot, no login needed, restarts on failure). **PowerShell (Admin)**, from the repo folder:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\install-tor-service.ps1 -SshServiceDir TorHiddenServiceSSH
+```
+
+The script copies `tor.exe` from Tor Browser into `TorExpertBundle\tor\` (git-ignored), writes `torrc-service` with absolute paths, gives the `LOCAL SERVICE` account access to `Data\` and the onion folder, stops a hand-started tor, installs the `tor` service and waits for `Bootstrapped 100%`. The existing onion keys are reused, so the `.onion` address stays the same.
+
+- `-SshServiceDir` = the folder that holds your SSH onion keys (default `TorHiddenService1`).
+- ⚠️ Run it **at the PC**, not over SSH-through-this-tor: stopping the hand-started tor drops that session (reconnect after ~1 min if you do).
+- After a Tor Browser update, run it again to refresh `tor.exe`.
+- Manage: `Get-Service tor`, `Restart-Service tor` (after editing `torrc-service`), log in `TorExpertBundle\tor\log.txt`.
+- Remove: `.\scripts\install-tor-service.ps1 -Uninstall`.
+- Tor Browser keeps working alongside (its own tor on 9150).
+
+
 ## 6. Client — connect through Tor
 
 **The client must be running tor too**: Tor Browser listens on **9150**, the Expert Bundle on **9050** — use whichever is running.
