@@ -501,6 +501,23 @@ The script copies `tor.exe` from Tor Browser into `TorExpertBundle\tor\` (git-ig
 - Remove: `.\scripts\install-tor-service.ps1 -Uninstall`.
 - Tor Browser keeps working alongside (its own tor on 9150).
 
+### 5.2 Watchdog: restart tor when the onion is stuck
+
+The service restarts tor when the process *crashes*, but not when tor keeps running and the onion is unreachable (stuck below 100%, clock skew, network blocking Tor…). The watchdog covers that. **PowerShell (Admin)**, once:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\install-tor-watchdog.ps1 -SshServiceDir TorHiddenServiceSSH
+```
+
+- Scheduled task `Tor_Watchdog` runs `scripts\tor-watchdog.ps1` as SYSTEM every 5 minutes (and 3 min after boot).
+- Each run checks: service running → SOCKS port listening → **connects to this PC's own .onion on port 22 through tor and expects an `SSH-` banner**.
+- 2 failed runs in a row → `Restart-Service tor` (at most once per 15 min). Log: `TorExpertBundle\tor\watchdog.log`; last result: `watchdog-state.json` (both git-ignored).
+- It also lets your account start/stop **only** the `tor` service, so `Restart-Service tor` works from a normal (non-admin) shell or an SSH session.
+- Check by hand anytime (no restart, no admin needed): `powershell -ExecutionPolicy Bypass -File .\scripts\tor-watchdog.ps1 -CheckOnly`
+- Remove: `.\scripts\install-tor-watchdog.ps1 -Uninstall`.
+- Want a phone notification when it stays down? Have something read `watchdog-state.json` (e.g. a cron job that alerts when `last_ok` is older than 15 min).
+
+
 
 ## 6. Client — connect through Tor
 
