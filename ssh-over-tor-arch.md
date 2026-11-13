@@ -103,6 +103,29 @@ Host mypc-user
 - Limit who may log in: add `AllowUsers adminaccount sshuser` to the drop-in file in §3.
 - Root over SSH only if you really must: `PermitRootLogin prohibit-password` (keys only) and a key in `/root/.ssh/authorized_keys`. Prefer `sudo`.
 
+### 2.4 Shell and interactive programs over SSH
+
+- The session starts in the account's **login shell** (`bash` on a default Arch install). Change it with `chsh -s /usr/bin/zsh` (log in again afterwards).
+- Full-screen / interactive programs (editors, `htop`, AI CLIs such as Hermes Agent, `python`) work normally after you log in.
+- Starting one **directly from the ssh command** needs `-t`: `ssh -t mypc hermes` — without it you get *not a terminal* errors or no prompt.
+- Tor connections can drop; run long sessions inside `tmux` (`sudo pacman -S tmux`, then `tmux new -A -s main`). After reconnecting, `tmux attach -t main` resumes where you were — the program keeps running on the server.
+
+### 2.5 (Optional) add your own tools to `PATH`
+
+User-installed programs (e.g. Hermes Agent, `pipx`/`npm -g` tools) often live in `~/.local/bin` or a tool-specific folder. If `ssh` sessions say `command not found`, find the program and add its folder to `PATH` in `~/.bashrc`:
+
+```bash
+ls ~/.local/bin                                  # or the folder the installer reported
+echo 'export PATH="$PATH:$HOME/.local/bin"' >> ~/.bashrc
+source ~/.bashrc
+command -v hermes                                # should print the path
+```
+
+- Example for a tool installed elsewhere: `echo 'export PATH="$PATH:/path/to/hermes/bin"' >> ~/.bashrc`.
+- `>>` appends — run it once; a second run only adds a duplicate line.
+- zsh users: put the line in `~/.zshrc` instead.
+- Non-interactive commands (`ssh mypc hermes --version`) don't read `~/.bashrc` on some setups; use the full path there, or `ssh -t mypc 'bash -lic "hermes --version"'`.
+
 ## 3. Server — configure sshd (localhost only, keys only)
 
 Arch's `/etc/ssh/sshd_config` includes `/etc/ssh/sshd_config.d/*.conf` at the top, so put your settings in a drop-in file instead of editing the main one (survives package updates):
