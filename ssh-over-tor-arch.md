@@ -278,6 +278,7 @@ Clients on other systems (Windows, Android Termux / Orbot / Tor VPN, macOS): see
 | tor service fails | `journalctl -u tor -e`; `sudo -u tor tor --verify-config -f /etc/tor/torrc`; `HiddenServiceDir` permissions (`sudo ls -ld /var/lib/tor/ssh` → `drwx------ tor tor`) |
 | No `hostname` file | tor hasn't started successfully since editing `torrc` — restart and check the journal |
 | `nc: invalid option -- 'X'` | `gnu-netcat` installed — `sudo pacman -S openbsd-netcat` |
+| `torsocks[...]: socks5 libc connect: Connection refused` |  tor not running on the client — `sudo systemctl start tor` (or start Tor Browser and use port 9150), check `ss -tln \| grep 9050` |
 | `connect to 127.0.0.1 port 9050: Connection refused` | tor not running on the client (`systemctl status tor`), or you use Tor Browser → port 9150 |
 | Connection times out | Server tor not at 100%, wrong `.onion` address, or server offline |
 | `REMOTE HOST IDENTIFICATION HAS CHANGED` | Server reinstalled with new host keys — verify, then `ssh-keygen -R xxxxxxxx.onion` |

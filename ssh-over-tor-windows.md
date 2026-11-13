@@ -541,6 +541,13 @@ tor > ~/tor.log 2>&1 &
 tail -f ~/tor.log          # wait for "Bootstrapped 100% (done)", then Ctrl+C
 ```
 
+Check that tor is really running before you connect — otherwise you get `Connection refused` (§9):
+
+```bash
+pgrep -a tor                         # must list a tor process
+nc -z 127.0.0.1 9050 && echo OK      # must print OK
+```
+
 Connect — either with torsocks:
 
 ```bash
@@ -651,6 +658,8 @@ Delete that device's line from `C:\ProgramData\ssh\administrators_authorized_key
 |---|---|
 | `Cannot find any service with service name 'sshd'` | OpenSSH Server not really installed → §1, use `winget install Microsoft.OpenSSH.Preview` |
 | `icacls ... The system cannot find the file specified` | Typo in the file name — it must end in `_keys` (`ls C:\ProgramData\ssh\`) |
+| `torsocks[...]: socks5 libc connect: Connection refused` then `ssh: connect to host xxx.onion port 22: Connection refused` | **tor isn't running on the client** — nothing listens on `127.0.0.1:9050`, so the connection never left the device. Termux: `tor > ~/tor.log 2>&1 &`, wait for `Bootstrapped 100%`, retry. Orbot: press Connect. Tor VPN: don't use `torsocks` / `ProxyCommand` at all (§7.3) |
+| Same `Connection refused` with `connect` / `nc` in `ProxyCommand` | Same cause, or wrong port: Tor Browser = 9150, Expert Bundle / Termux / Orbot = 9050 |
 | `Too many authentication failures` | ssh offered too many keys — set `IdentityFile` + `IdentitiesOnly yes` in `~/.ssh/config` (§3.4) |
 | `UNPROTECTED PRIVATE KEY FILE` / `bad permissions` on the client | Fix the private key's permissions (§3.6) |
 | `Warning: Identity file ... not accessible` | Wrong key file name after `-i` / `IdentityFile` → `ls ~/.ssh/` |
