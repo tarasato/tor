@@ -29,9 +29,9 @@ EOF
 
 # Make directory for HiddenServiceDir
 ```bash
-sudo mkdir -p /mnt/exmaple/tor
+sudo mkdir -p /mnt/exmaple/HiddenService1
 sudo chown -R tor:tor /mnt/exmaple/HiddenService1
-sudo chmod 700 /mnt/exmaple/tor
+sudo chmod 700 /mnt/exmaple/HiddenService1
 ```
 
 # Start Service
