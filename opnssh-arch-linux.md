@@ -23,3 +23,7 @@ echo "ssh-ed25519 example_key" >> ~/.ssh/authorized_keys
 ```bash
 chmod 600 ~/.ssh/authorized_keys
 ```
+# Move file
+```bash
+scp -i ~/.ssh/id_ed25519 -r C:/path/to/dir ubuntu@0.0.0.0:~/dir
+```
